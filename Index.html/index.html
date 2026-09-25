@@ -1,0 +1,1543 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hasta donde te quiero</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#050505;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    color:#fff;
+}
+
+.player{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    min-height:500px;
+    overflow:hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% 42%,
+            #191919 0%,
+            #0a0a0a 42%,
+            #030303 100%
+        );
+}
+
+/* =========================
+   TÍTULO
+========================= */
+
+.title{
+    position:absolute;
+    top:28px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:4;
+
+    color:#777;
+
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+
+    white-space:nowrap;
+}
+
+/* =========================
+   PARTÍCULAS
+========================= */
+
+#particles{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    pointer-events:none;
+
+    opacity:.7;
+}
+
+/* =========================
+   VENTANA DE LETRAS
+========================= */
+
+.lyrics-window{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:min(900px,94vw);
+    height:330px;
+
+    transform:translate(-50%,-50%);
+
+    overflow:hidden;
+
+    z-index:2;
+}
+
+.lyrics-track{
+    position:absolute;
+
+    left:0;
+    top:50%;
+
+    width:100%;
+
+    transform:translateY(-165px);
+
+    transition:
+        transform 520ms cubic-bezier(.22,.61,.36,1);
+
+    will-change:transform;
+}
+
+/* =========================
+   LÍNEAS
+========================= */
+
+.line{
+    width:100%;
+    height:86px;
+
+    padding:0 20px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    font-size:30px;
+    font-weight:600;
+
+    line-height:1.2;
+
+    color:#4b4b4b;
+
+    opacity:.28;
+
+    transform:scale(.94);
+
+    filter:blur(.2px);
+
+    transition:
+        opacity 520ms ease,
+        transform 520ms cubic-bezier(.22,.61,.36,1),
+        color 520ms ease,
+        filter 520ms ease;
+}
+
+/* Línea anterior/siguiente */
+
+.line.near{
+    opacity:.52;
+
+    color:#777;
+
+    transform:scale(.97);
+}
+
+/* Línea actual */
+
+.line.active{
+    opacity:1;
+
+    color:#f1f1f1;
+
+    transform:scale(1.035);
+
+    filter:blur(0);
+}
+
+/* =========================
+   PALABRAS
+========================= */
+
+.word{
+    display:inline-block;
+
+    /* separación entre palabras */
+    margin-right:.28em;
+
+    color:#555;
+
+    opacity:.25;
+
+    transform:translateY(2px);
+
+    /*
+       Más rápido para que el cambio
+       de color siga mejor la canción.
+    */
+    transition:
+        color 100ms linear,
+        opacity 100ms linear,
+        transform 100ms ease;
+}
+
+/* Palabras todavía no cantadas */
+
+.line.active .word{
+    color:#8a8a8a;
+    opacity:.42;
+}
+
+/* Palabras ya cantadas */
+
+.line.active .word.sung{
+    color:#f5f5f5;
+
+    opacity:1;
+
+    transform:translateY(0);
+}
+
+/* Palabra actual */
+
+.line.active .word.current{
+    color:#ffd84d;
+
+    opacity:1;
+
+    transform:
+        translateY(0)
+        scale(1.015);
+}
+
+/* =========================
+   CONTROLES
+========================= */
+
+.controls{
+    position:absolute;
+
+    left:50%;
+    bottom:28px;
+
+    width:min(760px,88vw);
+
+    transform:translateX(-50%);
+
+    z-index:5;
+}
+
+.time{
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:8px;
+
+    color:#777;
+
+    font-size:11px;
+}
+
+#progress{
+    width:100%;
+
+    height:4px;
+
+    accent-color:#ffd84d;
+
+    cursor:pointer;
+}
+
+.buttons{
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    gap:20px;
+
+    margin-top:15px;
+}
+
+button{
+    border:0;
+
+    background:transparent;
+
+    color:#888;
+
+    font-size:13px;
+
+    font-family:Arial,Helvetica,sans-serif;
+
+    cursor:pointer;
+
+    transition:
+        color .2s ease,
+        transform .2s ease;
+}
+
+button:hover{
+    color:#ffd84d;
+}
+
+.play{
+    width:50px;
+    height:50px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #666;
+
+    border-radius:50%;
+
+    color:#ffd84d;
+
+    font-size:17px;
+}
+
+.play:hover{
+    border-color:#ffd84d;
+
+    transform:scale(1.06);
+}
+
+/* =========================
+   SYNC
+========================= */
+
+.sync{
+    position:absolute;
+
+    right:18px;
+    bottom:31px;
+
+    z-index:5;
+
+    color:#555;
+
+    font-size:10px;
+}
+
+/* =========================
+   MÓVIL
+========================= */
+
+@media(max-width:600px){
+
+    .title{
+        top:20px;
+
+        font-size:9px;
+
+        letter-spacing:2px;
+    }
+
+    .lyrics-window{
+        height:290px;
+
+        width:100vw;
+    }
+
+    .lyrics-track{
+        transition-duration:500ms;
+    }
+
+    .line{
+        height:78px;
+
+        padding:0 18px;
+
+        font-size:25px;
+    }
+
+    .line.active{
+        transform:scale(1.025);
+    }
+
+    .controls{
+        bottom:18px;
+
+        width:88vw;
+    }
+
+    .sync{
+        right:10px;
+
+        bottom:20px;
+    }
+
+    .buttons{
+        gap:15px;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="player">
+
+    <!-- =========================
+         TÍTULO
+    ========================== -->
+
+    <div class="title">
+        Hasta donde te quiero
+    </div>
+
+
+    <!-- =========================
+         PARTÍCULAS
+    ========================== -->
+
+    <canvas id="particles"></canvas>
+
+
+    <!-- =========================
+         LETRAS
+    ========================== -->
+
+    <div class="lyrics-window">
+
+        <div
+            id="lyricsTrack"
+            class="lyrics-track">
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         CONTROLES
+    ========================== -->
+
+    <div class="controls">
+
+        <div class="time">
+
+            <span id="currentTime">
+                0:00
+            </span>
+
+            <span id="duration">
+                0:00
+            </span>
+
+        </div>
+
+
+        <input
+            id="progress"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            step="0.01"
+        >
+
+
+        <div class="buttons">
+
+            <button id="minusSync">
+                −0.1s
+            </button>
+
+
+            <button
+                id="playButton"
+                class="play">
+
+                ▶
+
+            </button>
+
+
+            <button id="plusSync">
+                +0.1s
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="syncLabel"
+        class="sync">
+
+        SYNC +0.0s
+
+    </div>
+
+
+    <!-- =========================
+         AUDIO
+    ========================== -->
+
+    <audio
+        id="audio"
+        preload="auto">
+
+        <source
+            src="./Hasta-donde-te-quiero.mp3"
+            type="audio/mpeg">
+
+    </audio>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   TIEMPOS DEL LRC
+===================================================== */
+
+const LETRA = [
+
+    [9.81,  "¿Qué hasta donde te quiero?"],
+    [11.71, "Siempre me has preguntado"],
+    [15.71, "No te sé decir"],
+
+    [22.17, "Si parece imposible"],
+    [25.01, "Alcanzar una estrella"],
+    [27.85, "Yo lo haría por ti"],
+
+    [34.27, "¿Qué hasta donde te quiero?"],
+
+    [46.27, "Esa necia pregunta"],
+    [48.93, "No responderé"],
+    [51.60, "Si en mi amor no hay distancias"],
+    [56.25, "Si no hay cerca, no hay lejos"],
+    [57.67, "¿Cómo te haré saber?"],
+    [59.09, "Júzgame como un loco"],
+    [60.51, "Piensa tú lo que quieras"],
+    [61.93, "Yo te quiero así"],
+
+    [67.48, "Quieres que yo te diga"],
+    [70.30, "Hasta donde te quiero"],
+    [73.12, "Hasta donde tus ojos no ven"],
+
+    [79.77, "No preguntes a mi alma, cuánto te amo"],
+    [82.77, "Porque para mi amor no hay distancias, ni fronteras"],
+    [86.77, "Y si quieres saber cuánto he"],
+    [89.77, "De amarte, te amo más"],
+    [92.77, "Allá de tu vida, de la mía y del"],
+    [95.61, "Tiempo, porque poca es la eternidad para"],
+    [101.56, "Adorarte"],
+
+    [103.32, "Si tú quieres soy loco"],
+    [105.08, "Píntame como quieras"],
+    [107.80, "Siempre esclavo de ti, seré"],
+
+    [113.08, "Quieres que yo te diga"],
+    [116.79, "Hasta donde te quiero"],
+    [120.50, "Hasta donde tus ojos no ven"],
+    [127.34, "Hasta donde tus ojos no ven"],
+    [133.63, "Hasta donde tus ojos no ven"]
+
+];
+
+
+/* =====================================================
+   ELEMENTOS
+===================================================== */
+
+const audio =
+    document.getElementById("audio");
+
+const track =
+    document.getElementById("lyricsTrack");
+
+const progress =
+    document.getElementById("progress");
+
+const playButton =
+    document.getElementById("playButton");
+
+const currentTimeEl =
+    document.getElementById("currentTime");
+
+const durationEl =
+    document.getElementById("duration");
+
+const syncLabel =
+    document.getElementById("syncLabel");
+
+const minusSync =
+    document.getElementById("minusSync");
+
+const plusSync =
+    document.getElementById("plusSync");
+
+
+/* =====================================================
+   CONFIGURACIÓN
+===================================================== */
+
+let syncOffset = 0;
+
+let activeIndex = -1;
+
+let animationFrame = null;
+
+
+/* =====================================================
+   CREAR LETRAS
+===================================================== */
+
+function createLyrics(){
+
+    track.innerHTML = "";
+
+    LETRA.forEach((item,index)=>{
+
+        const line =
+            document.createElement("div");
+
+        line.className = "line";
+
+        line.dataset.index = index;
+
+
+        const words =
+            item[1]
+                .trim()
+                .split(/\s+/);
+
+
+        words.forEach((word)=>{
+
+            const span =
+                document.createElement("span");
+
+            span.className = "word";
+
+            span.textContent = word;
+
+            /*
+               NO agregamos espacios manuales.
+               El margin-right del CSS se encarga
+               de separar las palabras.
+            */
+
+            line.appendChild(span);
+
+        });
+
+
+        track.appendChild(line);
+
+    });
+
+}
+
+
+/* =====================================================
+   BUSCAR LÍNEA SEGÚN EL TIEMPO
+===================================================== */
+
+function getLyricIndex(time){
+
+    let index = -1;
+
+
+    for(
+        let i = 0;
+        i < LETRA.length;
+        i++
+    ){
+
+        if(
+            time >=
+            LETRA[i][0] - syncOffset
+        ){
+
+            index = i;
+
+        }
+
+        else{
+
+            break;
+
+        }
+
+    }
+
+
+    return index;
+
+}
+
+
+/* =====================================================
+   ACTUALIZAR PALABRAS
+===================================================== */
+
+function updateWordProgress(index,time){
+
+    const lines =
+        document.querySelectorAll(".line");
+
+
+    lines.forEach(
+        (line,lineIndex)=>{
+
+        const words =
+            line.querySelectorAll(".word");
+
+
+        words.forEach(word=>{
+
+            word.classList.remove(
+                "sung",
+                "current"
+            );
+
+        });
+
+
+        if(lineIndex !== index){
+
+            return;
+
+        }
+
+
+        const start =
+            LETRA[index][0] -
+            syncOffset;
+
+
+        let end;
+
+
+        if(index < LETRA.length - 1){
+
+            end =
+                LETRA[index + 1][0] -
+                syncOffset;
+
+        }
+
+        else{
+
+            end =
+                Math.min(
+                    audio.duration ||
+                    start + 6,
+
+                    start + 6
+                );
+
+        }
+
+
+        /*
+           AQUÍ está el cambio principal:
+
+           Antes:
+           end - start
+
+           Ahora:
+           end - start - 0.4
+
+           La iluminación de las palabras
+           termina aproximadamente 0.4 segundos
+           antes.
+        */
+
+        const duration =
+            Math.max(
+                0.8,
+                end - start - 0.4
+            );
+
+
+        const elapsed =
+            Math.max(
+                0,
+                time - start
+            );
+
+
+        const progressWords =
+            Math.min(
+                0.999,
+                Math.max(
+                    0,
+                    elapsed / duration
+                )
+            );
+
+
+        const totalWords =
+            words.length;
+
+
+        const position =
+            progressWords *
+            totalWords;
+
+
+        const completed =
+            Math.floor(position);
+
+
+        words.forEach(
+            (word,wordIndex)=>{
+
+            /*
+               Palabras ya cantadas.
+            */
+
+            if(
+                wordIndex <
+                completed
+            ){
+
+                word.classList.add(
+                    "sung"
+                );
+
+            }
+
+
+            /*
+               Palabra actual.
+            */
+
+            if(
+                wordIndex === completed &&
+                completed < totalWords
+            ){
+
+                word.classList.add(
+                    "current"
+                );
+
+            }
+
+        });
+
+    });
+
+}
+
+
+/* =====================================================
+   ACTIVAR LÍNEA
+===================================================== */
+
+function setActive(index){
+
+    const lines =
+        document.querySelectorAll(".line");
+
+
+    if(index < 0){
+
+        activeIndex = -1;
+
+
+        lines.forEach(line=>{
+
+            line.classList.remove(
+                "active",
+                "near"
+            );
+
+        });
+
+
+        track.style.transform =
+            "translateY(-165px)";
+
+
+        return;
+
+    }
+
+
+    if(index >= LETRA.length){
+
+        index =
+            LETRA.length - 1;
+
+    }
+
+
+    if(index === activeIndex){
+
+        return;
+
+    }
+
+
+    activeIndex = index;
+
+
+    lines.forEach(
+        (line,i)=>{
+
+        line.classList.remove(
+            "active",
+            "near"
+        );
+
+
+        if(i === index){
+
+            line.classList.add(
+                "active"
+            );
+
+        }
+
+        else if(
+            Math.abs(i-index) === 1
+        ){
+
+            line.classList.add(
+                "near"
+            );
+
+        }
+
+    });
+
+
+    const lineHeight =
+        window.innerWidth <= 600
+        ? 78
+        : 86;
+
+
+    const centerOffset =
+        window.innerWidth <= 600
+        ? 145
+        : 165;
+
+
+    track.style.transform =
+
+        `translateY(
+            -${
+                index * lineHeight +
+                centerOffset
+            }px
+        )`;
+
+}
+
+
+/* =====================================================
+   FORMATO DEL TIEMPO
+===================================================== */
+
+function formatTime(seconds){
+
+    if(!isFinite(seconds)){
+
+        return "0:00";
+
+    }
+
+
+    const min =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    const sec =
+        Math.floor(
+            seconds % 60
+        );
+
+
+    return (
+        `${min}:` +
+        `${String(sec).padStart(2,"0")}`
+    );
+
+}
+
+
+/* =====================================================
+   ACTUALIZAR REPRODUCTOR
+===================================================== */
+
+function updatePlayer(){
+
+    const time =
+        audio.currentTime;
+
+
+    const index =
+        getLyricIndex(time);
+
+
+    setActive(index);
+
+
+    updateWordProgress(
+        index,
+        time
+    );
+
+
+    if(
+        audio.duration &&
+        isFinite(audio.duration)
+    ){
+
+        progress.value =
+            (time / audio.duration) *
+            100;
+
+
+        durationEl.textContent =
+            formatTime(
+                audio.duration
+            );
+
+    }
+
+
+    currentTimeEl.textContent =
+        formatTime(time);
+
+
+    if(!audio.paused){
+
+        cancelAnimationFrame(
+            animationFrame
+        );
+
+
+        animationFrame =
+            requestAnimationFrame(
+                updatePlayer
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   PLAY / PAUSE
+===================================================== */
+
+playButton.addEventListener(
+    "click",
+    async ()=>{
+
+        if(audio.paused){
+
+            try{
+
+                await audio.play();
+
+            }
+
+            catch(error){
+
+                console.error(
+                    "No se pudo reproducir el audio:",
+                    error
+                );
+
+            }
+
+        }
+
+        else{
+
+            audio.pause();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   EVENTO PLAY
+===================================================== */
+
+audio.addEventListener(
+    "play",
+    ()=>{
+
+        playButton.textContent =
+            "❚❚";
+
+
+        cancelAnimationFrame(
+            animationFrame
+        );
+
+
+        animationFrame =
+            requestAnimationFrame(
+                updatePlayer
+            );
+
+    }
+);
+
+
+/* =====================================================
+   EVENTO PAUSA
+===================================================== */
+
+audio.addEventListener(
+    "pause",
+    ()=>{
+
+        playButton.textContent =
+            "▶";
+
+
+        cancelAnimationFrame(
+            animationFrame
+        );
+
+
+        updatePlayer();
+
+    }
+);
+
+
+/* =====================================================
+   EVENTO FINAL
+===================================================== */
+
+audio.addEventListener(
+    "ended",
+    ()=>{
+
+        playButton.textContent =
+            "▶";
+
+
+        cancelAnimationFrame(
+            animationFrame
+        );
+
+    }
+);
+
+
+/* =====================================================
+   METADATA
+===================================================== */
+
+audio.addEventListener(
+    "loadedmetadata",
+    ()=>{
+
+        durationEl.textContent =
+            formatTime(
+                audio.duration
+            );
+
+
+        updatePlayer();
+
+    }
+);
+
+
+/* =====================================================
+   TIMEUPDATE
+===================================================== */
+
+audio.addEventListener(
+    "timeupdate",
+    ()=>{
+        updatePlayer();
+    }
+);
+
+
+/* =====================================================
+   SEEK
+===================================================== */
+
+audio.addEventListener(
+    "seeked",
+    ()=>{
+
+        activeIndex = -1;
+
+        updatePlayer();
+
+    }
+);
+
+
+/* =====================================================
+   BARRA DE PROGRESO
+===================================================== */
+
+progress.addEventListener(
+    "input",
+    ()=>{
+
+        if(!audio.duration){
+
+            return;
+
+        }
+
+
+        audio.currentTime =
+            (
+                progress.value / 100
+            ) *
+            audio.duration;
+
+
+        updatePlayer();
+
+    }
+);
+
+
+/* =====================================================
+   SINCRONIZACIÓN MANUAL
+===================================================== */
+
+function changeSync(amount){
+
+    syncOffset += amount;
+
+
+    syncOffset =
+        Math.round(
+            syncOffset * 10
+        ) / 10;
+
+
+    syncLabel.textContent =
+
+        `SYNC ${
+            syncOffset >= 0
+            ? "+"
+            : ""
+        }${syncOffset.toFixed(1)}s`;
+
+
+    activeIndex = -1;
+
+
+    updatePlayer();
+
+}
+
+
+minusSync.addEventListener(
+    "click",
+    ()=>{
+        changeSync(-0.1);
+    }
+);
+
+
+plusSync.addEventListener(
+    "click",
+    ()=>{
+        changeSync(0.1);
+    }
+);
+
+
+/* =====================================================
+   INICIO
+===================================================== */
+
+createLyrics();
+
+setActive(-1);
+
+
+/* =====================================================
+   PARTÍCULAS MUSICALES
+===================================================== */
+
+const canvas =
+    document.getElementById(
+        "particles"
+    );
+
+
+const ctx =
+    canvas.getContext("2d");
+
+
+let particles = [];
+
+
+const symbols = [
+    "♪",
+    "♫",
+    "♩",
+    "♬"
+];
+
+
+function resizeCanvas(){
+
+    canvas.width =
+        window.innerWidth;
+
+
+    canvas.height =
+        window.innerHeight;
+
+}
+
+
+resizeCanvas();
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+function createParticle(){
+
+    particles.push({
+
+        x:
+            Math.random() *
+            canvas.width,
+
+
+        y:
+            canvas.height *
+            (
+                .35 +
+                Math.random() *
+                .65
+            ),
+
+
+        symbol:
+            symbols[
+                Math.floor(
+                    Math.random() *
+                    symbols.length
+                )
+            ],
+
+
+        size:
+            18 +
+            Math.random() *
+            20,
+
+
+        speed:
+            .15 +
+            Math.random() *
+            .4,
+
+
+        drift:
+            Math.random() *
+            1.2 -
+            .6,
+
+
+        wave:
+            Math.random() *
+            Math.PI *
+            2,
+
+
+        waveSpeed:
+            .008 +
+            Math.random() *
+            .012,
+
+
+        opacity:
+            .06 +
+            Math.random() *
+            .16,
+
+
+        life:0,
+
+
+        maxLife:
+            300 +
+            Math.random() *
+            400
+
+    });
+
+}
+
+
+setInterval(
+    ()=>{
+
+        if(
+            particles.length < 18
+        ){
+
+            createParticle();
+
+        }
+
+    },
+    650
+);
+
+
+function animateParticles(){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    particles.forEach(p=>{
+
+        p.life++;
+
+
+        p.y -=
+            p.speed;
+
+
+        p.wave +=
+            p.waveSpeed;
+
+
+        p.x +=
+            p.drift +
+            Math.sin(p.wave) *
+            .25;
+
+
+        let alpha =
+            p.opacity;
+
+
+        if(
+            p.life < 70
+        ){
+
+            alpha *=
+                p.life / 70;
+
+        }
+
+
+        if(
+            p.life >
+            p.maxLife - 90
+        ){
+
+            alpha *=
+                (
+                    p.maxLife -
+                    p.life
+                ) / 90;
+
+        }
+
+
+        ctx.save();
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                alpha
+            );
+
+
+        ctx.font =
+            `${p.size}px Arial`;
+
+
+        ctx.fillStyle =
+            "#ffd84d";
+
+
+        ctx.fillText(
+            p.symbol,
+            p.x,
+            p.y
+        );
+
+
+        ctx.restore();
+
+    });
+
+
+    particles =
+        particles.filter(
+            p =>
+                p.life <
+                    p.maxLife &&
+                p.y >
+                    -80
+        );
+
+
+    requestAnimationFrame(
+        animateParticles
+    );
+
+}
+
+
+animateParticles();
+
+</script>
+
+</body>
+</html>
